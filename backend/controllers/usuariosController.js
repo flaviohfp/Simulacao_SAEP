@@ -16,17 +16,11 @@ async function listarUsuarios(req, res) {
 
 
 
-
-
-
-
-
-
 async function criarUsuario(req, res) {
     try {
-        const { nome, idade, email } = req.body;
+        const { nome, email } = req.body;
 
-        const usuario = await usuariosService.criarUsuario(nome, idade, email);
+        const usuario = await usuariosService.criarUsuario(nome, email);
 
         res.status(201).json({
             mensagem: "Usuário criado com sucesso",
@@ -46,9 +40,9 @@ async function atualizarUsuario(req, res) {
         if (isNaN(id) || id <= 0) {
             return res.status(400).json({ erro: "ID inválido" });
         }
-        const { nome, idade, email } = req.body;
+        const { nome, email } = req.body;
 
-        const usuario = await usuariosService.atualizarUsuario(id, nome, idade, email);
+        const usuario = await usuariosService.atualizarUsuario(id, nome, email);
 
         if (!usuario) {
             return res.status(404).json({

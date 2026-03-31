@@ -20,7 +20,7 @@ async function listarUsuarios() {
 
 
 
-async function criarUsuario(nome, idade, email) {
+async function criarUsuario(nome, email) {
     // Validação de nome vazio
     if (!nome || nome.trim() === "") {
         throw new Error("Nome é obrigatório");
@@ -30,10 +30,6 @@ async function criarUsuario(nome, idade, email) {
     if (nome.trim().length < 3) {
         throw new Error("Nome deve ter no mínimo 3 caracteres");
     }
-
-   
-
-   
 
    
 
@@ -50,16 +46,16 @@ async function criarUsuario(nome, idade, email) {
     const resultado = await pool.query(
         `
         INSERT INTO usuarios (nome, email)
-        VALUES ($1, $2,)
+        VALUES ($1, $2)
         RETURNING *
         `,
-        [nome, idade, email]
+        [nome, email]
     );
 
     return resultado.rows[0];
 }
 
-async function atualizarUsuario(id, nome, idade, email) {
+async function atualizarUsuario(id, nome, email) {
     const usuario = await buscarUsuarioPorId(id);
 
     if (!usuario) {
