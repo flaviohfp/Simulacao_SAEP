@@ -16,3 +16,24 @@ header .nav.nav-pills .nav-link.active {
     color: white !important;
     background-color: rgba(255,255,255,0.2) !important;
 }
+
+.cadastro-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5rem;
+    font-family: sans-serif;
+  }
+  
+  .cadastro-center input,
+  .cadastro-center button {
+    display: block;
+    width: 300px;
+    padding: 8px;
+    margin-bottom: 1rem;
+    font-size: 15px;
+  }
+  
+  .cadastro-center button {
+    cursor: pointer;
+  }
