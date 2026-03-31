@@ -1,0 +1,18 @@
+header {
+    background-color: rgb(36, 95, 255);
+    color: white;
+}
+
+header .nav.nav-pills .nav-link {
+    color: white !important;
+}
+
+header .nav.nav-pills .nav-link:hover,
+header .nav.nav-pills .nav-link:focus {
+    color: white !important;
+}
+
+header .nav.nav-pills .nav-link.active {
+    color: white !important;
+    background-color: rgba(255,255,255,0.2) !important;
+}
