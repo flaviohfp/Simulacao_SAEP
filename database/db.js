@@ -1,4 +1,10 @@
-const { Pool } = require("pg");
+const path = require("path");
+const { createRequire } = require("module");
+
+const backendRequire = createRequire(
+  path.join(__dirname, "..", "backend", "package.json")
+);
+const { Pool } = backendRequire("pg");
 
 const pool = new Pool({
   host: process.env.DB_HOST || "localhost",
