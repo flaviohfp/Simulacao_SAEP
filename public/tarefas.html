@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Tarefas | Simulacao SAEP</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body>
+    <header class="app-header shadow-sm">
+      <div class="container py-3">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3">
+          <div class="me-lg-auto">
+            <p class="eyebrow mb-1">Simulacao SAEP</p>
+            <h1 class="h3 mb-1">Cadastro de Tarefas</h1>
+            <p class="mb-0 text-white-50">
+              Associe cada tarefa a um usuario, definindo setor, prioridade e status inicial.
+            </p>
+          </div>
+          <nav class="nav nav-pills app-nav">
+            <a class="nav-link" href="/">Gerenciar tarefas</a>
+            <a class="nav-link" href="/cadastro">Cadastro de usuarios</a>
+            <a class="nav-link active" href="/tarefas">Cadastro de tarefas</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="container py-4 py-lg-5">
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <section class="form-card">
+            <h2 class="h4 mb-3">Nova tarefa</h2>
+            <p class="text-secondary mb-4">
+              O status inicial sera preenchido como "a fazer" por padrao, conforme o enunciado.
+            </p>
+            <div id="mensagemTarefa" class="alert d-none" role="alert"></div>
+            <form id="formTarefa" novalidate>
+              <div class="mb-3">
+                <label for="descricao" class="form-label">Descricao da tarefa</label>
+                <textarea id="descricao" class="form-control" rows="4" required minlength="5"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="setor" class="form-label">Setor</label>
+                <input id="setor" class="form-control" type="text" required minlength="2" />
+              </div>
+              <div class="mb-3">
+                <label for="idUsuario" class="form-label">Usuario responsavel</label>
+                <select id="idUsuario" class="form-select" required></select>
+              </div>
+              <div class="mb-4">
+                <label for="prioridade" class="form-label">Prioridade</label>
+                <select id="prioridade" class="form-select" required>
+                  <option value="">Selecione</option>
+                  <option value="baixa">Baixa</option>
+                  <option value="media">Media</option>
+                  <option value="alta">Alta</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Cadastrar tarefa</button>
+            </form>
+          </section>
+        </div>
+        <div class="col-lg-6">
+          <section class="form-card h-100">
+            <h2 class="h4 mb-3">Checklist da entrega</h2>
+            <ul class="delivery-list mb-0">
+              <li>Cadastro de usuarios com validacao de todos os campos.</li>
+              <li>Cadastro de tarefas associado a usuario previamente cadastrado.</li>
+              <li>Status padrao definido como "a fazer".</li>
+              <li>Persistencia no banco via API Express + PostgreSQL.</li>
+              <li>Tela inicial com gerenciamento completo das tarefas.</li>
+              <li>Arquivos de DER, caso de uso e script SQL na pasta do projeto.</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script src="/assets/js/tarefas.js"></script>
+  </body>
+</html>

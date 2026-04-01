@@ -1,118 +1,139 @@
-const pool = require("../database/db");
+const pool = require("../../database/db");
 
-let usuarios = [];
-let proximoId = 1;
+function criarErro(mensagem, statusCode = 400) {
+  const erro = new Error(mensagem);
+  erro.statusCode = statusCode;
+  return erro;
+}
 
+function validarId(id) {
+  if (!Number.isInteger(id) || id <= 0) {
+    throw criarErro("ID de usuario invalido.");
+  }
+}
 
-/* -------------------------
-   FUNÇÕES DE LÓGICA
--------------------------- */
+function validarNome(nome) {
+  if (!nome || typeof nome !== "string" || nome.trim().length < 3) {
+    throw criarErro("Informe um nome com pelo menos 3 caracteres.");
+  }
 
+  return nome.trim();
+}
+
+function validarEmail(email) {
+  const emailNormalizado = String(email || "").trim().toLowerCase();
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!regex.test(emailNormalizado)) {
+    throw criarErro("Informe um e-mail valido.");
+  }
+
+  return emailNormalizado;
+}
+
+function tratarErroBanco(erro) {
+  if (erro.code === "23505") {
+    throw criarErro("Ja existe um usuario cadastrado com este e-mail.", 409);
+  }
+
+  if (erro.code === "23503") {
+    throw criarErro(
+      "Nao e possivel remover este usuario porque ele possui tarefas vinculadas.",
+      409
+    );
+  }
+
+  throw erro;
+}
 
 async function listarUsuarios() {
+  const resultado = await pool.query(
+    `SELECT id, nome, email
+     FROM usuarios
+     ORDER BY nome ASC`
+  );
 
-    const resultado = await pool.query(
-        "SELECT * FROM usuarios ORDER BY id"
-    );
-
-    return resultado.rows;
+  return resultado.rows;
 }
 
+async function buscarUsuarioPorId(id) {
+  validarId(id);
 
+  const resultado = await pool.query(
+    `SELECT id, nome, email
+     FROM usuarios
+     WHERE id = $1`,
+    [id]
+  );
 
-async function criarUsuario(nome, email) {
-    // Validação de nome vazio
-    if (!nome || nome.trim() === "") {
-        throw new Error("Nome é obrigatório");
-    }
+  return resultado.rows[0] || null;
+}
 
-    // Nome deve ter no mínimo 3 caracteres
-    if (nome.trim().length < 3) {
-        throw new Error("Nome deve ter no mínimo 3 caracteres");
-    }
+async function criarUsuario(dados) {
+  const nome = validarNome(dados.nome);
+  const email = validarEmail(dados.email);
 
-   
-
-    // Email obrigatório
-    if (!email || email.trim() === "") {
-        throw new Error("Email é obrigatório");
-    }
-
-    // Email deve conter @
-    if (!email.includes("@")) {
-        throw new Error("Email deve conter @");
-    }
-
+  try {
     const resultado = await pool.query(
-        `
-        INSERT INTO usuarios (nome, email)
-        VALUES ($1, $2)
-        RETURNING *
-        `,
-        [nome, email]
+      `INSERT INTO usuarios (nome, email)
+       VALUES ($1, $2)
+       RETURNING id, nome, email`,
+      [nome, email]
     );
 
     return resultado.rows[0];
+  } catch (erro) {
+    tratarErroBanco(erro);
+  }
 }
 
-async function atualizarUsuario(id, nome, email) {
-    const usuario = await buscarUsuarioPorId(id);
+async function atualizarUsuario(id, dados) {
+  validarId(id);
 
-    if (!usuario) {
-        return null;
-    }
+  const usuarioAtual = await buscarUsuarioPorId(id);
+  if (!usuarioAtual) {
+    return null;
+  }
 
-    // Validação de nome
-    if (nome !== undefined && nome !== null) {
-        if (nome.trim() === "") {
-            throw new Error("Nome é obrigatório");
-        }
-        if (nome.trim().length < 3) {
-            throw new Error("Nome deve ter no mínimo 3 caracteres");
-        }
-        usuario.nome = nome.trim();
-    }
+  const nome = validarNome(dados.nome);
+  const email = validarEmail(dados.email);
 
-   
-
-    // Validação de email
-    if (email !== undefined && email !== null) {
-        if (email.trim() === "") {
-            throw new Error("Email é obrigatório");
-        }
-        if (!email.includes("@")) {
-            throw new Error("Email deve conter @");
-        }
-        usuario.email = email.trim();
-    }
-
+  try {
     const resultado = await pool.query(
-        `
-        UPDATE usuarios
-        SET nome = COALESCE($1, nome),
-            email = COALESCE($3, email)
-        WHERE id = $4
-        RETURNING *
-        `,
-        [nome, email, id]
+      `UPDATE usuarios
+       SET nome = $1,
+           email = $2
+       WHERE id = $3
+       RETURNING id, nome, email`,
+      [nome, email, id]
     );
 
-    return resultado.rows[0];
+    return resultado.rows[0] || null;
+  } catch (erro) {
+    tratarErroBanco(erro);
+  }
 }
 
 async function deletarUsuario(id) {
+  validarId(id);
 
+  try {
     const resultado = await pool.query(
-        "DELETE FROM usuarios WHERE id = $1",
-        [id]
+      `DELETE FROM usuarios
+       WHERE id = $1`,
+      [id]
     );
 
     return resultado.rowCount > 0;
+  } catch (erro) {
+    tratarErroBanco(erro);
+  }
 }
 
 module.exports = {
-    listarUsuarios,
-    criarUsuario,
-    atualizarUsuario,
-    deletarUsuario
+  listarUsuarios,
+  buscarUsuarioPorId,
+  criarUsuario,
+  atualizarUsuario,
+  deletarUsuario,
 };

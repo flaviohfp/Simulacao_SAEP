@@ -1,91 +1,82 @@
-
 const usuariosService = require("../services/usuariosService");
 
-/* -------------------------
-   ROTAS - CONTROLLERS
--------------------------- */
-
 async function listarUsuarios(req, res) {
-    try {
-        const usuarios = await usuariosService.listarUsuarios();
-        res.json(usuarios);
-    } catch (erro) {
-        res.status(500).json({ erro: erro.message });
-    }
+  try {
+    const usuarios = await usuariosService.listarUsuarios();
+    res.json(usuarios);
+  } catch (erro) {
+    res.status(500).json({ erro: "Nao foi possivel listar os usuarios." });
+  }
 }
 
+async function buscarUsuario(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const usuario = await usuariosService.buscarUsuarioPorId(id);
 
+    if (!usuario) {
+      return res.status(404).json({ erro: "Usuario nao encontrado." });
+    }
+
+    return res.json(usuario);
+  } catch (erro) {
+    return res.status(400).json({ erro: erro.message });
+  }
+}
 
 async function criarUsuario(req, res) {
-    try {
-        const { nome, email } = req.body;
+  try {
+    const usuario = await usuariosService.criarUsuario(req.body);
 
-        const usuario = await usuariosService.criarUsuario(nome, email);
-
-        res.status(201).json({
-            mensagem: "Usuário criado com sucesso",
-            usuario
-        });
-
-    } catch (erro) {
-        res.status(400).json({
-            erro: erro.message
-        });
-    }
+    res.status(201).json({
+      mensagem: "Usuario cadastrado com sucesso.",
+      usuario,
+    });
+  } catch (erro) {
+    const status = erro.statusCode || 400;
+    res.status(status).json({ erro: erro.message });
+  }
 }
 
 async function atualizarUsuario(req, res) {
-    try {
-        const id = Number(req.params.id);
-        if (isNaN(id) || id <= 0) {
-            return res.status(400).json({ erro: "ID inválido" });
-        }
-        const { nome, email } = req.body;
+  try {
+    const id = Number(req.params.id);
+    const usuario = await usuariosService.atualizarUsuario(id, req.body);
 
-        const usuario = await usuariosService.atualizarUsuario(id, nome, email);
-
-        if (!usuario) {
-            return res.status(404).json({
-                erro: "Usuário não encontrado"
-            });
-        }
-
-        res.json({
-            mensagem: "Usuário atualizado com sucesso",
-            usuario
-        });
-
-    } catch (erro) {
-        res.status(400).json({
-            erro: erro.message
-        });
+    if (!usuario) {
+      return res.status(404).json({ erro: "Usuario nao encontrado." });
     }
+
+    return res.json({
+      mensagem: "Usuario atualizado com sucesso.",
+      usuario,
+    });
+  } catch (erro) {
+    const status = erro.statusCode || 400;
+    return res.status(status).json({ erro: erro.message });
+  }
 }
 
 async function deletarUsuario(req, res) {
-    try {
-        const id = Number(req.params.id);
-        if (isNaN(id) || id <= 0) {
-            return res.status(400).json({ erro: "ID inválido" });
-        }
-        const removido = await usuariosService.deletarUsuario(id);
+  try {
+    const id = Number(req.params.id);
+    const removido = await usuariosService.deletarUsuario(id);
 
-        if (!removido) {
-            return res.status(404).json({
-                erro: "Usuário não encontrado"
-            });
-        }
-
-        res.status(204).send();
-    } catch (erro) {
-        res.status(500).json({ erro: erro.message });
+    if (!removido) {
+      return res.status(404).json({ erro: "Usuario nao encontrado." });
     }
+
+    return res.status(204).send();
+  } catch (erro) {
+    const status = erro.statusCode || 500;
+    return res.status(status).json({ erro: erro.message });
+  }
 }
 
 module.exports = {
-    listarUsuarios,
-    criarUsuario,
-    atualizarUsuario,
-    deletarUsuario
+  listarUsuarios,
+  buscarUsuario,
+  criarUsuario,
+  atualizarUsuario,
+  deletarUsuario,
 };
-
