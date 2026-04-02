@@ -36,7 +36,7 @@ Se o banco `saep` ainda nao existir, crie no PostgreSQL.
 Exemplo no `psql`:
 
 ```sql
-CREATE DATABASE SAEP;
+CREATE DATABASE seap;
 ```
 
 ## Configuracao do .env
@@ -48,7 +48,7 @@ PGHOST=localhost
 PGPORT=5432
 PGUSER=postgres
 PGPASSWORD=sua_senha_do_postgres
-PGDATABASE=SAEP
+PGDATABASE=saep
 ```
 
 Observacoes:
