@@ -14,7 +14,7 @@ const mensagemBoard = document.getElementById("mensagemBoard");
 const totalTarefas = document.getElementById("totalTarefas");
 const totalUsuarios = document.getElementById("totalUsuarios");
 const formEdicao = document.getElementById("formEdicao");
-const modalEdicao = new bootstrap.Modal(document.getElementById("modalEdicao"));
+const modalEdicao = document.getElementById("modalEdicao");
 const selectEdicaoUsuario = document.getElementById("edicaoUsuario");
 
 let usuariosCache = [];
@@ -22,12 +22,12 @@ let tarefasCache = [];
 
 function mostrarMensagem(texto, tipo) {
   mensagemBoard.textContent = texto;
-  mensagemBoard.className = `alert alert-${tipo}`;
-  mensagemBoard.classList.remove("d-none");
+  mensagemBoard.className = `message message-${tipo}`;
 }
 
 function limparMensagem() {
-  mensagemBoard.classList.add("d-none");
+  mensagemBoard.textContent = "";
+  mensagemBoard.className = "message hidden";
 }
 
 function formatarData(data) {
@@ -56,34 +56,60 @@ function preencherSelectUsuarios() {
   });
 }
 
+function criarCampoMeta(rotulo, valor) {
+  const item = document.createElement("span");
+  item.textContent = `${rotulo}: ${valor}`;
+  return item;
+}
+
+function criarTag(texto, classe) {
+  const tag = document.createElement("span");
+  tag.className = `tag ${classe}`;
+  tag.textContent = texto;
+  return tag;
+}
+
+function abrirModal() {
+  modalEdicao.classList.remove("hidden");
+  modalEdicao.setAttribute("aria-hidden", "false");
+}
+
+function fecharModal() {
+  modalEdicao.classList.add("hidden");
+  modalEdicao.setAttribute("aria-hidden", "true");
+}
+
 function criarCardTarefa(tarefa) {
   const card = document.createElement("article");
   card.className = "task-card";
-  card.innerHTML = `
-    <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
-      <h3>${tarefa.descricao}</h3>
-      <span class="priority-badge ${classePrioridade(tarefa.prioridade)}">${tarefa.prioridade}</span>
-    </div>
-    <div class="task-meta">
-      <span><strong>Setor:</strong> ${tarefa.setor}</span>
-      <span><strong>Usuario:</strong> ${tarefa.usuario_nome}</span>
-      <span><strong>Status:</strong> <span class="status-badge ${classeStatus(tarefa.status)}">${tarefa.status}</span></span>
-      <span><strong>Cadastro:</strong> ${formatarData(tarefa.data_cadastro)}</span>
-    </div>
-    <div class="task-actions">
-      <select class="form-select form-select-sm" data-action="status">
-        <option value="a fazer" ${tarefa.status === "a fazer" ? "selected" : ""}>A fazer</option>
-        <option value="fazendo" ${tarefa.status === "fazendo" ? "selected" : ""}>Fazendo</option>
-        <option value="pronto" ${tarefa.status === "pronto" ? "selected" : ""}>Pronto</option>
-      </select>
-      <div class="d-flex gap-2">
-        <button class="btn btn-outline-primary btn-sm w-100" data-action="editar">Editar</button>
-        <button class="btn btn-outline-danger btn-sm w-100" data-action="excluir">Excluir</button>
-      </div>
-    </div>
-  `;
 
-  card.querySelector('[data-action="status"]').addEventListener("change", async (event) => {
+  const titulo = document.createElement("h3");
+  titulo.className = "task-card-title";
+  titulo.textContent = tarefa.descricao;
+
+  const meta = document.createElement("div");
+  meta.className = "meta-list";
+  meta.appendChild(criarCampoMeta("Setor", tarefa.setor));
+  meta.appendChild(criarCampoMeta("Usuario", tarefa.usuario_nome));
+  meta.appendChild(criarCampoMeta("Data", formatarData(tarefa.data_cadastro)));
+
+  const tags = document.createElement("div");
+  tags.className = "tag-row";
+  tags.appendChild(criarTag(`Prioridade: ${tarefa.prioridade}`, classePrioridade(tarefa.prioridade)));
+  tags.appendChild(criarTag(`Status: ${tarefa.status}`, classeStatus(tarefa.status)));
+
+  const selectStatus = document.createElement("select");
+  selectStatus.className = "select-control";
+
+  ["a fazer", "fazendo", "pronto"].forEach((status) => {
+    const option = document.createElement("option");
+    option.value = status;
+    option.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    option.selected = tarefa.status === status;
+    selectStatus.appendChild(option);
+  });
+
+  selectStatus.addEventListener("change", async (event) => {
     try {
       await atualizarStatus(tarefa.id, event.target.value);
       await carregarDados();
@@ -94,11 +120,19 @@ function criarCardTarefa(tarefa) {
     }
   });
 
-  card.querySelector('[data-action="editar"]').addEventListener("click", () => {
+  const botaoEditar = document.createElement("button");
+  botaoEditar.type = "button";
+  botaoEditar.className = "button-secondary";
+  botaoEditar.textContent = "Editar";
+  botaoEditar.addEventListener("click", () => {
     abrirModalEdicao(tarefa);
   });
 
-  card.querySelector('[data-action="excluir"]').addEventListener("click", async () => {
+  const botaoExcluir = document.createElement("button");
+  botaoExcluir.type = "button";
+  botaoExcluir.className = "button-danger";
+  botaoExcluir.textContent = "Excluir";
+  botaoExcluir.addEventListener("click", async () => {
     const confirmado = window.confirm(`Deseja realmente excluir a tarefa "${tarefa.descricao}"?`);
 
     if (!confirmado) {
@@ -113,6 +147,17 @@ function criarCardTarefa(tarefa) {
       mostrarMensagem(erro.message, "danger");
     }
   });
+
+  const acoes = document.createElement("div");
+  acoes.className = "card-actions";
+  acoes.appendChild(botaoEditar);
+  acoes.appendChild(botaoExcluir);
+
+  card.appendChild(titulo);
+  card.appendChild(meta);
+  card.appendChild(tags);
+  card.appendChild(selectStatus);
+  card.appendChild(acoes);
 
   return card;
 }
@@ -173,7 +218,7 @@ function abrirModalEdicao(tarefa) {
   document.getElementById("edicaoUsuario").value = String(tarefa.id_usuario);
   document.getElementById("edicaoPrioridade").value = tarefa.prioridade;
   document.getElementById("edicaoStatus").value = tarefa.status;
-  modalEdicao.show();
+  abrirModal();
 }
 
 async function atualizarStatus(id, status) {
@@ -199,6 +244,18 @@ async function excluirTarefa(id) {
     throw new Error(dados.erro || "Nao foi possivel excluir a tarefa.");
   }
 }
+
+modalEdicao.addEventListener("click", (event) => {
+  if (event.target.hasAttribute("data-close-modal")) {
+    fecharModal();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !modalEdicao.classList.contains("hidden")) {
+    fecharModal();
+  }
+});
 
 formEdicao.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -229,7 +286,7 @@ formEdicao.addEventListener("submit", async (event) => {
       throw new Error(dados.erro || "Nao foi possivel atualizar a tarefa.");
     }
 
-    modalEdicao.hide();
+    fecharModal();
     await carregarDados();
     mostrarMensagem(dados.mensagem, "success");
   } catch (erro) {

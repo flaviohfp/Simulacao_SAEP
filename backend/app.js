@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const { inicializarBanco } = require("../database/db");
 
 const usuariosRoutes = require("./routes/usuarios");
 const tarefasRoutes = require("./routes/tarefas");
@@ -31,6 +32,18 @@ app.use((req, res) => {
 
 const porta = Number(process.env.PORT) || 3000;
 
-app.listen(porta, () => {
-  console.log(`Servidor rodando em http://localhost:${porta}`);
-});
+async function iniciarServidor() {
+  try {
+    await inicializarBanco();
+
+    app.listen(porta, () => {
+      console.log(`Servidor rodando em http://localhost:${porta}`);
+    });
+  } catch (erro) {
+    console.error("Nao foi possivel conectar ao PostgreSQL.");
+    console.error(erro.message);
+    process.exit(1);
+  }
+}
+
+iniciarServidor();

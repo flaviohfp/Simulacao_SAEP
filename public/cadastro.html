@@ -3,70 +3,98 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadastro de Usuarios | Simulacao SAEP</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous"
-    />
+    <title>Simulacao SAEP | Cadastro de Usuarios</title>
     <link rel="stylesheet" href="/assets/css/style.css" />
   </head>
   <body>
-    <header class="app-header shadow-sm">
-      <div class="container py-3">
-        <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3">
-          <div class="me-lg-auto">
-            <p class="eyebrow mb-1">Simulacao SAEP</p>
-            <h1 class="h3 mb-1">Cadastro de Usuarios</h1>
-            <p class="mb-0 text-white-50">
-              Formulario com validacao obrigatoria e persistencia no banco.
-            </p>
-          </div>
-          <nav class="nav nav-pills app-nav">
-            <a class="nav-link" href="/">Gerenciar tarefas</a>
-            <a class="nav-link active" href="/cadastro">Cadastro de usuarios</a>
-            <a class="nav-link" href="/tarefas">Cadastro de tarefas</a>
-          </nav>
+    <header class="topbar">
+      <div class="wrapper topbar-content">
+        <div>
+          <p class="page-tag">SIMULACAO SAEP</p>
+          <h1>Cadastro de usuarios</h1>
+          <p class="page-subtitle">
+            Tela de cadastro e manutencao dos usuarios responsaveis pelas tarefas.
+          </p>
         </div>
+        <nav class="nav-links" aria-label="Navegacao principal">
+          <a href="/">Tarefas</a>
+          <a class="active" href="/cadastro">Usuarios</a>
+          <a href="/tarefas">Nova tarefa</a>
+        </nav>
       </div>
     </header>
 
-    <main class="container py-4 py-lg-5">
-      <div class="row g-4">
-        <div class="col-lg-5">
-          <section class="form-card">
-            <h2 class="h4 mb-3">Novo usuario</h2>
-            <p class="text-secondary mb-4">
-              Todos os campos sao obrigatorios e o e-mail deve ter formato valido.
-            </p>
-            <div id="mensagem" class="alert d-none" role="alert"></div>
-            <form id="formCadastro" novalidate>
-              <div class="mb-3">
-                <label for="nome" class="form-label">Nome</label>
-                <input id="nome" name="nome" type="text" class="form-control" required minlength="3" />
-              </div>
-              <div class="mb-4">
-                <label for="email" class="form-label">E-mail</label>
-                <input id="email" name="email" type="email" class="form-control" required />
-              </div>
-              <button type="submit" class="btn btn-primary w-100">Cadastrar usuario</button>
-            </form>
-          </section>
+    <main class="wrapper page-content two-panels">
+      <section class="panel">
+        <h2>Novo usuario</h2>
+        <p class="section-text">
+          Preencha nome e e-mail. Os dois campos sao obrigatorios.
+        </p>
+
+        <div id="mensagem" class="message hidden" role="alert"></div>
+
+        <form id="formCadastro" class="form-grid" novalidate>
+          <label class="field">
+            <span>Nome</span>
+            <input id="nome" name="nome" type="text" required minlength="3" />
+          </label>
+
+          <label class="field">
+            <span>E-mail</span>
+            <input id="email" name="email" type="email" required />
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="button">Cadastrar usuario</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-header">
+          <div>
+            <h2>Usuarios cadastrados</h2>
+            <p class="section-text">Aqui voce pode consultar, editar e excluir usuarios.</p>
+          </div>
+          <button id="atualizarListaUsuarios" class="button button-secondary" type="button">
+            Atualizar
+          </button>
         </div>
-        <div class="col-lg-7">
-          <section class="form-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h2 class="h4 mb-0">Usuarios cadastrados</h2>
-              <button id="atualizarListaUsuarios" class="btn btn-outline-primary btn-sm" type="button">
-                Atualizar lista
-              </button>
-            </div>
-            <div id="listaUsuarios" class="list-group gap-3"></div>
-          </section>
-        </div>
-      </div>
+
+        <div id="listaUsuarios" class="stack-list"></div>
+      </section>
     </main>
+
+    <section id="modalUsuario" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop" data-close-user-modal="true"></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloModalUsuario">
+        <div class="modal-header">
+          <h2 id="tituloModalUsuario">Editar usuario</h2>
+          <button type="button" class="icon-button" data-close-user-modal="true" aria-label="Fechar">
+            x
+          </button>
+        </div>
+
+        <form id="formEdicaoUsuario" class="form-grid">
+          <input type="hidden" id="edicaoUsuarioId" />
+
+          <label class="field">
+            <span>Nome</span>
+            <input id="edicaoUsuarioNome" type="text" required minlength="3" />
+          </label>
+
+          <label class="field">
+            <span>E-mail</span>
+            <input id="edicaoUsuarioEmail" type="email" required />
+          </label>
+
+          <div class="form-actions">
+            <button type="button" class="button button-secondary" data-close-user-modal="true">Cancelar</button>
+            <button type="submit" class="button">Salvar alteracoes</button>
+          </div>
+        </form>
+      </div>
+    </section>
 
     <script src="/assets/js/usuarios.js"></script>
   </body>

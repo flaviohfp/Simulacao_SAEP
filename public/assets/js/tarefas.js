@@ -4,8 +4,12 @@ const mensagemTarefa = document.getElementById("mensagemTarefa");
 
 function exibirMensagem(texto, tipo) {
   mensagemTarefa.textContent = texto;
-  mensagemTarefa.className = `alert alert-${tipo}`;
-  mensagemTarefa.classList.remove("d-none");
+  mensagemTarefa.className = `message message-${tipo}`;
+}
+
+function esconderMensagem() {
+  mensagemTarefa.textContent = "";
+  mensagemTarefa.className = "message hidden";
 }
 
 async function carregarUsuarios() {
@@ -24,6 +28,7 @@ async function carregarUsuarios() {
 
 formTarefa.addEventListener("submit", async (event) => {
   event.preventDefault();
+  esconderMensagem();
 
   if (!formTarefa.reportValidity()) {
     return;
@@ -57,8 +62,5 @@ formTarefa.addEventListener("submit", async (event) => {
 });
 
 carregarUsuarios().catch(() => {
-  exibirMensagem(
-    "Cadastre pelo menos um usuario antes de criar tarefas.",
-    "warning"
-  );
+  exibirMensagem("Cadastre pelo menos um usuario antes de criar tarefas.", "warning");
 });
